@@ -1,10 +1,11 @@
-import java.util.*;
+import java.util.Arrays;
 import java.util.HashSet;
+
 public class Strategies {
     private GameBoard gameBoard;
     public static HashSet<GameBoard> visited = new HashSet<>();
 
-    public Strategies(GameBoard board){
+    public Strategies(GameBoard board) {
         this.gameBoard = board;
     }
 
@@ -17,12 +18,10 @@ public class Strategies {
         this.gameBoard = gameBoard;
     }
 
-
-    public void DFS(){
+    public void DFS() {
         GameBoard currentBoard = this.gameBoard;
         visited.add(currentBoard);
         PieceMover currentPieceMover = new PieceMover(currentBoard);
-        // System.out.println(Arrays.toString(currentPieceMover.getPossibleMoves().get(i)));
 
 
     }

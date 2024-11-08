@@ -6,7 +6,6 @@ record Piece(PieceColor color, boolean isMagnetic) {
             case PURPLE -> "P";
             case RED -> "R";
             case BLACK -> "B";
-            default -> " ";
         };
     }
 

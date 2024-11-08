@@ -1,5 +1,6 @@
 public class Cell {
     private final boolean isTarget;
+    private boolean isBlocked;
     private final int row;
     private final int col;
     private Piece piece;
@@ -34,8 +35,20 @@ public class Cell {
         return col;
     }
 
-    @Override
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
     public String toString() {
-        return isOccupied() ? piece.toString() : (isTarget ? "W" : " ");
+        if (isBlocked()) {
+            return " X "; // If the cell is blocked, print "S"
+        }
+        return (isTarget ? "W" : " ") + " " +
+                (piece != null ? piece.getColor() : "E");
+    }
+
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }
