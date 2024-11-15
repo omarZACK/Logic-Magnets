@@ -1,5 +1,8 @@
-import java.util.ArrayList;
-import java.util.List;
+package Actions;
+import Structure.Cell;
+import Structure.GameBoard;
+import Structure.Piece;
+import java.util.*;
 
 public class PieceMover {
     private final GameBoard gameBoard;
@@ -9,7 +12,6 @@ public class PieceMover {
     }
 
     public void movePiece(int fromRow, int fromCol, int toRow, int toCol) {
-
         Cell fromCell = gameBoard.getCell(fromRow, fromCol);
         Cell toCell = gameBoard.getCell(toRow, toCol);
 
@@ -22,8 +24,8 @@ public class PieceMover {
         if (piece != null && piece.isMagnetic()) {
             toCell.setPiece(piece);
             fromCell.setPiece(null);
-
-            // Check if the moved piece is purple or red and apply corresponding effects
+            this.gameBoard.cellsWithPieces.remove(fromCell);
+            this.gameBoard.cellsWithPieces.add(toCell);
             if ("P".equals(piece.getColor())) {
                 pushAllCells(toRow, toCol);
             } else if ("R".equals(piece.getColor())) {
@@ -35,10 +37,9 @@ public class PieceMover {
     }
 
     private void pushAllCells(int row, int col) {
-        pushInDirection(Directions.UP, row, col);
-        pushInDirection(Directions.DOWN, row, col);
-        pushInDirection(Directions.LEFT, row, col);
-        pushInDirection(Directions.RIGHT, row, col);
+        for (Directions direction : Directions.values()) {
+            pushInDirection(direction, row, col);
+        }
     }
 
     private void pushInDirection(Directions direction, int row, int col) {
@@ -47,73 +48,61 @@ public class PieceMover {
         int dRow = 0, dCol = 0;
 
         switch (direction) {
-            case UP: dRow = -1; break;
-            case DOWN: dRow = 1; break;
-            case LEFT: dCol = -1; break;
-            case RIGHT: dCol = 1; break;
+            case UP -> dRow = -1;
+            case DOWN -> dRow = 1;
+            case LEFT -> dCol = -1;
+            case RIGHT -> dCol = 1;
         }
 
         List<Cell> cellsToPush = new ArrayList<>();
         int currentRow = row + dRow;
         int currentCol = col + dCol;
-        boolean pushingGroup = false; // Flag to track if we're pushing a group
+        boolean pushingGroup = false;
 
-        // Loop to find the first piece or group to push
         while (currentRow >= 0 && currentRow < height && currentCol >= 0 && currentCol < width) {
             Cell currentCell = gameBoard.getCell(currentRow, currentCol);
 
-            // Skip blocked cells
             if (currentCell == null || currentCell.isBlocked()) {
                 currentRow += dRow;
                 currentCol += dCol;
                 continue;
             }
 
-            // If the cell contains a piece, it's part of a group to push
             if (currentCell.getPiece() != null) {
-                if (!pushingGroup) {
-                    // Start a new group of pieces to push
-                    pushingGroup = true;
-                }
+                pushingGroup = true;
                 cellsToPush.add(currentCell);
             } else if (pushingGroup) {
-                // If we've already found a group and encounter an empty space, stop
                 break;
             }
 
-            // Move in the direction
             currentRow += dRow;
             currentCol += dCol;
         }
 
-        // Now that we've identified the group of cells to push, move them
         if (!cellsToPush.isEmpty()) {
-            // Loop through the list of cellsToPush, shifting each piece one step in the direction
             for (int i = cellsToPush.size() - 1; i >= 0; i--) {
                 Cell currentCell = cellsToPush.get(i);
-
-                // Find the cell that this piece should move to
                 int targetRow = currentCell.getRow() + dRow;
                 int targetCol = currentCell.getCol() + dCol;
 
-                // Check if the target cell is within bounds and not blocked or occupied
                 if (targetRow >= 0 && targetRow < height && targetCol >= 0 && targetCol < width) {
                     Cell targetCell = gameBoard.getCell(targetRow, targetCol);
 
-                    // Move the piece to the target cell if it's not blocked and not occupied
                     if (targetCell != null && !targetCell.isBlocked() && !targetCell.isOccupied()) {
                         targetCell.setPiece(currentCell.getPiece());
-                        currentCell.setPiece(null); // Set the original cell to null
+                        currentCell.setPiece(null);
+                        this.gameBoard.cellsWithPieces.add(targetCell);
+                        this.gameBoard.cellsWithPieces.remove(currentCell);
                     }
                 }
             }
         }
     }
+
     private void pullAllCells(int row, int col) {
-        pullInDirection(Directions.UP, row, col);
-        pullInDirection(Directions.DOWN, row, col);
-        pullInDirection(Directions.LEFT, row, col);
-        pullInDirection(Directions.RIGHT, row, col);
+        for (Directions direction : Directions.values()) {
+            pullInDirection(direction, row, col);
+        }
     }
 
     private void pullInDirection(Directions direction, int row, int col) {
@@ -122,10 +111,10 @@ public class PieceMover {
         int dRow = 0, dCol = 0;
 
         switch (direction) {
-            case UP: dRow = -1; break;
-            case DOWN: dRow = 1; break;
-            case LEFT: dCol = -1; break;
-            case RIGHT: dCol = 1; break;
+            case UP -> dRow = -1;
+            case DOWN -> dRow = 1;
+            case LEFT -> dCol = -1;
+            case RIGHT -> dCol = 1;
         }
 
         int currentRow = row + dRow;
@@ -134,7 +123,6 @@ public class PieceMover {
         while (currentRow >= 0 && currentRow < height && currentCol >= 0 && currentCol < width) {
             Cell currentCell = gameBoard.getCell(currentRow, currentCol);
 
-            // Skip blocked cells
             if (currentCell == null || currentCell.isBlocked()) {
                 currentRow += dRow;
                 currentCol += dCol;
@@ -142,11 +130,12 @@ public class PieceMover {
             }
 
             if (currentCell.getPiece() != null) {
-                // Pull the piece to the previous cell if it's not blocked and the previous cell is empty
                 Cell previousCell = gameBoard.getCell(currentRow - dRow, currentCol - dCol);
                 if (previousCell != null && !previousCell.isOccupied()) {
                     previousCell.setPiece(currentCell.getPiece());
                     currentCell.setPiece(null);
+                    this.gameBoard.cellsWithPieces.add(previousCell);
+                    this.gameBoard.cellsWithPieces.remove(currentCell);
                 }
             }
             currentRow += dRow;

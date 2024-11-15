@@ -1,36 +1,53 @@
+import Actions.Strategy;
+import Actions.UserPlay;
+import Structure.GameBoard;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         GameBoard gameBoard = new GameBoard();
-        System.out.print("Enter the level number: ");
-        String board_number = scanner.nextLine();
-        String filename = String.format("src/Grids/board%s", board_number);
-        gameBoard.loadFromFile(filename);
-//        Strategies strategies = new Strategies(gameBoard);
-//        strategies.DFS();
-        PieceMover pieceMover = new PieceMover(gameBoard);
+        System.out.println("============================================================================");
+        System.out.println("\t\t\t\t\t\tWelcome to Logic Magnets");
+        System.out.println("============================================================================");
+        System.out.print("Please enter the level number (1-25): ");
+        int board_number = 0;
         while (true) {
-            gameBoard.printGrid();
-            // Check for win condition
-            if (gameBoard.checkAllPiecesOnTargets()) {
-                System.out.println("Congratulations! All pieces are on white cells.");
+            try {
+                board_number = scanner.nextInt();
                 break;
-            }
-            System.out.print("Enter move (format: fromRow fromCol toRow toCol): ");
-            String input = scanner.nextLine();
-            String[] parts = input.split(" ");
-            if (parts.length == 4) {
-                int fromRow = Integer.parseInt(parts[0]);
-                int fromCol = Integer.parseInt(parts[1]);
-                int toRow = Integer.parseInt(parts[2]);
-                int toCol = Integer.parseInt(parts[3]);
-                pieceMover.movePiece(fromRow, fromCol, toRow, toCol);
-            } else {
-                System.out.println("Invalid input. Please enter four integers.");
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input. Please enter a valid number for the level: ");
+                scanner.next();
             }
         }
-        scanner.close();
+        String filename = String.format("src/Grids/board%s", board_number);
+        gameBoard.loadFromFile(filename);
+
+        System.out.println("Choose your playing method:");
+        System.out.println("1. User to play");
+        System.out.println("2. Solve the game using DFS");
+        System.out.println("3. Solve the game using BFS");
+        System.out.print("Enter your choice (1-3): ");
+        int PlayMethod = scanner.nextInt();
+        switch (PlayMethod){
+            case 1:
+                UserPlay userPlay = new UserPlay(gameBoard);
+                userPlay.play();
+                break;
+            case 2:
+                Strategy strategy = new Strategy();
+                strategy.DFS(gameBoard);
+                break;
+            case 3:
+                Strategy strategyBFS = new Strategy();
+                strategyBFS.BFS(gameBoard);
+                break;
+            default:
+                break;
+
+        }
     }
+
 }
