@@ -84,7 +84,6 @@ public class GameBoard {
     }
 
     public Cell getCell(int row, int col) {
-        // Ensure we don't recursively call isValidPosition and loop
         if (row >= 0 && row < height && col >= 0 && col < width) {
             int index = row * width + col;
             return cells.get(index);
@@ -114,7 +113,6 @@ public class GameBoard {
         }
         System.out.println();
     }
-
 
     public boolean checkAllPiecesOnTargets() {
         for (Cell cell : this.cellsWithPieces) {

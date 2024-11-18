@@ -9,14 +9,18 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         GameBoard gameBoard = new GameBoard();
         System.out.println("============================================================================");
-        System.out.println("\t\t\t\t\t\tWelcome to Logic Magnets");
+        System.out.printf("%50s%n", "Welcome to Logic Magnets!");
         System.out.println("============================================================================");
         System.out.print("Please enter the level number (1-25): ");
-        int board_number = 0;
+        int board_number;
         while (true) {
             try {
                 board_number = scanner.nextInt();
-                break;
+                if (board_number >= 1 && board_number <= 25) {
+                    break;
+                } else {
+                    System.out.print("Invalid input. Please enter a valid number between 1 and 25: ");
+                }
             } catch (InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a valid number for the level: ");
                 scanner.next();
@@ -24,12 +28,14 @@ public class Main {
         }
         String filename = String.format("src/Grids/board%s", board_number);
         gameBoard.loadFromFile(filename);
+        gameBoard.printGrid();
 
         System.out.println("Choose your playing method:");
         System.out.println("1. User to play");
         System.out.println("2. Solve the game using DFS");
         System.out.println("3. Solve the game using BFS");
-        System.out.print("Enter your choice (1-3): ");
+        System.out.println("4. Solve the game using UCS");
+        System.out.print("Enter your choice (1-4): ");
         int PlayMethod = scanner.nextInt();
         switch (PlayMethod){
             case 1:
@@ -43,6 +49,10 @@ public class Main {
             case 3:
                 Strategy strategyBFS = new Strategy();
                 strategyBFS.BFS(gameBoard);
+                break;
+            case 4:
+                Strategy strategyUCS = new Strategy();
+                strategyUCS.UCS(gameBoard);
                 break;
             default:
                 break;

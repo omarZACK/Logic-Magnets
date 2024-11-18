@@ -14,6 +14,13 @@ public class Cell {
         this.col = col;
     }
 
+    public Cell(boolean isTarget, int row, int col,boolean IsBlocked) {
+        this.isTarget = isTarget;
+        this.isBlocked = IsBlocked;
+        this.row = row;
+        this.col = col;
+    }
+
     public boolean isTarget() {
         return isTarget;
     }
@@ -44,14 +51,14 @@ public class Cell {
 
     public String toString() {
         if (isBlocked()) {
-            return " X ";
+            return " X "+"\033[0m";
         }
         return (isTarget ? "W" : " ") + " " +
                 (piece != null ? piece.getColor() : "E");
     }
 
     public Cell copy() {
-        Cell copy = new Cell(this.isTarget, this.row, this.col);
+        Cell copy = new Cell(this.isTarget, this.row, this.col,this.isBlocked);
         if (this.piece != null) {
             copy.setPiece(this.piece.copy());
         }
@@ -82,5 +89,4 @@ public class Cell {
         // Generate hash code using key properties
         return Objects.hash(isTarget, isBlocked, row, col, piece);
     }
-
 }

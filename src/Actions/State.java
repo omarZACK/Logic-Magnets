@@ -1,42 +1,41 @@
 package Actions;
+
 import Structure.Cell;
 import Structure.GameBoard;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class State {
-    private  State parent;
+public class State implements Comparable<State> {
+    private State parent;
     private final GameBoard value;
-    private int depth=0;
-//    private int cost = 1;
+    private int depth = 0;
+    private int cost = 0;
 
     public State(GameBoard value) {
-        this.value= value;
+        this.value = value;
     }
 
-
-    public State(State parent, GameBoard value)
-    {
+    public State(State parent, GameBoard value) {
         this.parent = parent;
         this.value = value;
     }
-    public State(State parent, GameBoard value,int depth)
-    {
+
+    public State(State parent, GameBoard value, int depth) {
         this.parent = parent;
         this.value = value;
         this.depth = depth;
     }
-//    public State(State parent, GameBoard value, int cost)
-//    {
-//        this.parent = parent;
-//        this.value = value;
-//        this.cost = cost;
-//    }
 
+    public State(State parent, GameBoard value, int depth, int cost) {
+        this.depth = depth;
+        this.parent = parent;
+        this.value = value;
+        this.cost = cost;
+    }
 
-    public boolean hasPrevious()
-    {
+    public boolean hasPrevious() {
         return this.parent != null;
     }
 
@@ -47,40 +46,27 @@ public class State {
     public List<State> getWinPath() {
         List<State> winPath = new ArrayList<>();
         State current = this;
-        while (current != null) {
+        while (current.hasPrevious()) {
             winPath.add(current);
             current = current.getParent();
         }
         return winPath;
     }
+
     public GameBoard getValue() {
         return value;
     }
 
-//    public int getCost() {
-//        return cost;
-//    }
-//
-//    public void setCost(int cost) {
-//        this.cost = cost;
-//    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        State state = (State) obj;
-        // Compare relevant fields (e.g., game board configuration) for equality
-        return this.value.equals(state.value);
+    public int getCost() {
+        return cost;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(value); // Use game board's hash as the hash code
+    public void setCost(int cost) {
+        this.cost = cost;
     }
 
     public ArrayList<State> generateNextStates() {
-
+        int cost;
         ArrayList<State> nextStates = new ArrayList<>();
         for (int row = 0; row < getValue().getHeight(); row++) {
             for (int col = 0; col < getValue().getWidth(); col++) {
@@ -92,8 +78,8 @@ public class State {
                             if (targetCell != null && !targetCell.isBlocked() && !targetCell.isOccupied()) {
                                 GameBoard newBoard = this.getValue().copy();
                                 PieceMover newPieceMover = new PieceMover(newBoard);
-                                newPieceMover.movePiece(row, col, i, j);
-                                nextStates.add(new State(this, newBoard));
+                                cost = newPieceMover.movePiece(row, col, i, j);
+                                nextStates.add(new State(this, newBoard, 0,1));
                             }
                         }
                     }
@@ -118,5 +104,23 @@ public class State {
 
     public int getDepth() {
         return depth;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        State state = (State) obj;
+        return this.value.equals(state.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
+    }
+
+    @Override
+    public int compareTo(State other) {
+        return Integer.compare(this.cost, other.cost);
     }
 }

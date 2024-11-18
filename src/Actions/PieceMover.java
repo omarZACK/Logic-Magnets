@@ -11,13 +11,14 @@ public class PieceMover {
         this.gameBoard = gameBoard;
     }
 
-    public void movePiece(int fromRow, int fromCol, int toRow, int toCol) {
+    public int movePiece(int fromRow, int fromCol, int toRow, int toCol) {
+        int EffectedPieces=0;
         Cell fromCell = gameBoard.getCell(fromRow, fromCol);
         Cell toCell = gameBoard.getCell(toRow, toCol);
 
         if (toCell == null || toCell.isOccupied() || toCell.isBlocked()) {
             System.out.println("Cannot move there, cell is blocked or occupied.");
-            return;
+            return 0;
         }
 
         Piece piece = fromCell.getPiece();
@@ -27,37 +28,39 @@ public class PieceMover {
             this.gameBoard.cellsWithPieces.remove(fromCell);
             this.gameBoard.cellsWithPieces.add(toCell);
             if ("P".equals(piece.getColor())) {
-                pushAllCells(toRow, toCol);
+                EffectedPieces = pushAllCells(toRow, toCol);
             } else if ("R".equals(piece.getColor())) {
-                pullAllCells(toRow, toCol);
+                EffectedPieces = pullAllCells(toRow, toCol);
             }
         } else {
             System.out.println("Invalid move. Please select a magnetic piece.");
         }
+        return EffectedPieces+1;
     }
 
-    private void pushAllCells(int row, int col) {
+    private int pushAllCells(int row, int col) {
+        int EffectedPieces = 0;
         for (Directions direction : Directions.values()) {
-            pushInDirection(direction, row, col);
+            EffectedPieces+=pushInDirection(direction, row, col);
         }
+        return EffectedPieces;
     }
 
-    private void pushInDirection(Directions direction, int row, int col) {
+    private int pushInDirection(Directions direction, int row, int col) {
         int height = gameBoard.getHeight();
         int width = gameBoard.getWidth();
         int dRow = 0, dCol = 0;
 
         switch (direction) {
-            case UP -> dRow = -1;
-            case DOWN -> dRow = 1;
-            case LEFT -> dCol = -1;
-            case RIGHT -> dCol = 1;
+            case UP, DOWN -> dRow = direction.getdRow();
+            case LEFT, RIGHT -> dCol = direction.getdCol();
         }
 
         List<Cell> cellsToPush = new ArrayList<>();
         int currentRow = row + dRow;
         int currentCol = col + dCol;
         boolean pushingGroup = false;
+        int NumOfPushed = 0;
 
         while (currentRow >= 0 && currentRow < height && currentCol >= 0 && currentCol < width) {
             Cell currentCell = gameBoard.getCell(currentRow, currentCol);
@@ -91,34 +94,37 @@ public class PieceMover {
                     if (targetCell != null && !targetCell.isBlocked() && !targetCell.isOccupied()) {
                         targetCell.setPiece(currentCell.getPiece());
                         currentCell.setPiece(null);
+                        NumOfPushed++;
                         this.gameBoard.cellsWithPieces.add(targetCell);
                         this.gameBoard.cellsWithPieces.remove(currentCell);
                     }
                 }
             }
         }
+        return NumOfPushed;
     }
 
-    private void pullAllCells(int row, int col) {
+    private int pullAllCells(int row, int col) {
+        int EffectedPieces = 0;
         for (Directions direction : Directions.values()) {
-            pullInDirection(direction, row, col);
+            EffectedPieces+=pullInDirection(direction, row, col);
         }
+        return EffectedPieces;
     }
 
-    private void pullInDirection(Directions direction, int row, int col) {
+    private int pullInDirection(Directions direction, int row, int col) {
         int height = gameBoard.getHeight();
         int width = gameBoard.getWidth();
         int dRow = 0, dCol = 0;
 
         switch (direction) {
-            case UP -> dRow = -1;
-            case DOWN -> dRow = 1;
-            case LEFT -> dCol = -1;
-            case RIGHT -> dCol = 1;
+            case UP, DOWN -> dRow = direction.getdRow();
+            case LEFT, RIGHT -> dCol = direction.getdCol();
         }
 
         int currentRow = row + dRow;
         int currentCol = col + dCol;
+        int NumOfPulled = 0;
 
         while (currentRow >= 0 && currentRow < height && currentCol >= 0 && currentCol < width) {
             Cell currentCell = gameBoard.getCell(currentRow, currentCol);
@@ -134,6 +140,7 @@ public class PieceMover {
                 if (previousCell != null && !previousCell.isOccupied()) {
                     previousCell.setPiece(currentCell.getPiece());
                     currentCell.setPiece(null);
+                    NumOfPulled++;
                     this.gameBoard.cellsWithPieces.add(previousCell);
                     this.gameBoard.cellsWithPieces.remove(currentCell);
                 }
@@ -141,5 +148,6 @@ public class PieceMover {
             currentRow += dRow;
             currentCol += dCol;
         }
+        return NumOfPulled;
     }
 }

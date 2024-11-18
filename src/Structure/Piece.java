@@ -5,9 +5,7 @@ public record Piece(PieceColor color, boolean isMagnetic) {
     @Override
     public String toString() {
         return switch (color) {
-            case PURPLE -> "P";
-            case RED -> "R";
-            case BLACK -> "B";
+            case PURPLE, BLACK, RED -> color.getSymbol();
         };
     }
 

@@ -29,7 +29,7 @@ public class UserPlay {
                 int fromCol = Integer.parseInt(parts[1]);
                 int toRow = Integer.parseInt(parts[2]);
                 int toCol = Integer.parseInt(parts[3]);
-                pieceMover.movePiece(fromRow, fromCol, toRow, toCol);
+                System.out.println(pieceMover.movePiece(fromRow, fromCol, toRow, toCol));
             } else {
                 System.out.println("Invalid input. Please enter four integers.");
             }
