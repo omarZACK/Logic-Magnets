@@ -35,8 +35,22 @@ public class Main {
         System.out.println("2. Solve the game using DFS");
         System.out.println("3. Solve the game using BFS");
         System.out.println("4. Solve the game using UCS");
-        System.out.print("Enter your choice (1-4): ");
-        int PlayMethod = scanner.nextInt();
+        System.out.println("5. Solve the game using HillClimbing");
+        System.out.print("Enter your choice (1-5): ");
+        int PlayMethod;
+        while (true) {
+            try {
+                PlayMethod = scanner.nextInt();
+                if (PlayMethod >= 1 && PlayMethod <= 5) {
+                    break;
+                } else {
+                    System.out.print("Invalid input. Please enter a valid number between 1 and 5: ");
+                }
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input. Please enter a valid number for the level: ");
+                scanner.next();
+            }
+        }
         switch (PlayMethod){
             case 1:
                 UserPlay userPlay = new UserPlay(gameBoard);
@@ -53,6 +67,10 @@ public class Main {
             case 4:
                 Strategy strategyUCS = new Strategy();
                 strategyUCS.UCS(gameBoard);
+                break;
+            case 5:
+                Strategy strategyUCSH = new Strategy();
+                strategyUCSH.HillClimbing(gameBoard);
                 break;
             default:
                 break;

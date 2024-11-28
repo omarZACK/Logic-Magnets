@@ -11,22 +11,36 @@ public class PieceMover {
         this.gameBoard = gameBoard;
     }
 
-    public int movePiece(int fromRow, int fromCol, int toRow, int toCol) {
+
+    private void updateCellList(Cell fromCell, Cell toCell,List<Cell> cells) {
+        Iterator<Cell> iterator = cells.iterator();
+        while (iterator.hasNext()) {
+            Cell cell = iterator.next();
+            if (cell.getRow() == fromCell.getRow() && cell.getCol() == fromCell.getCol()) {
+                iterator.remove();
+                break;
+            }
+        }
+        cells.add(toCell);
+    }
+
+    public Object[] movePiece(int fromRow, int fromCol, int toRow, int toCol) {
         int EffectedPieces=0;
         Cell fromCell = gameBoard.getCell(fromRow, fromCol);
         Cell toCell = gameBoard.getCell(toRow, toCol);
 
         if (toCell == null || toCell.isOccupied() || toCell.isBlocked()) {
             System.out.println("Cannot move there, cell is blocked or occupied.");
-            return 0;
+            return new Object[]{0 ,0};
         }
 
         Piece piece = fromCell.getPiece();
         if (piece != null && piece.isMagnetic()) {
             toCell.setPiece(piece);
             fromCell.setPiece(null);
-            this.gameBoard.cellsWithPieces.remove(fromCell);
-            this.gameBoard.cellsWithPieces.add(toCell);
+
+            updateCellList(fromCell,toCell,this.gameBoard.cellsWithPieces);
+            updateCellList(fromCell,toCell,this.gameBoard.CellsWithMagnetsPieces);
             if ("P".equals(piece.getColor())) {
                 EffectedPieces = pushAllCells(toRow, toCol);
             } else if ("R".equals(piece.getColor())) {
@@ -35,7 +49,24 @@ public class PieceMover {
         } else {
             System.out.println("Invalid move. Please select a magnetic piece.");
         }
-        return EffectedPieces+1;
+        return new Object[]{EffectedPieces, calculateDistances()};
+    }
+
+    private double calculateDistances() {
+        List<Cell> Targets = gameBoard.TargetCells;
+        List<Cell> pieceCells = gameBoard.cellsWithPieces;
+        double totalDistance = 0;
+        for (Cell targetCell : pieceCells){
+            double minDistance = Double.MAX_VALUE;
+            for (Cell pieceCell : Targets) {
+                double distance = Math.sqrt(Math.pow(targetCell.getRow() - pieceCell.getRow(), 2) + Math.pow(targetCell.getCol() - pieceCell.getCol(), 2));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                }
+            }
+            totalDistance += minDistance;
+        }
+        return totalDistance;
     }
 
     private int pushAllCells(int row, int col) {
@@ -95,8 +126,7 @@ public class PieceMover {
                         targetCell.setPiece(currentCell.getPiece());
                         currentCell.setPiece(null);
                         NumOfPushed++;
-                        this.gameBoard.cellsWithPieces.add(targetCell);
-                        this.gameBoard.cellsWithPieces.remove(currentCell);
+                        updateCellList(currentCell,targetCell,this.gameBoard.cellsWithPieces);
                     }
                 }
             }
@@ -141,8 +171,7 @@ public class PieceMover {
                     previousCell.setPiece(currentCell.getPiece());
                     currentCell.setPiece(null);
                     NumOfPulled++;
-                    this.gameBoard.cellsWithPieces.add(previousCell);
-                    this.gameBoard.cellsWithPieces.remove(currentCell);
+                    updateCellList(currentCell,previousCell,this.gameBoard.cellsWithPieces);
                 }
             }
             currentRow += dRow;
